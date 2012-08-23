@@ -4,6 +4,7 @@ require 'notify'
 require 'commander/import'
 
 ROOT = File.dirname(File.realpath(__FILE__))
+Dir[File.join(ROOT, 'lib', 'prelim','*.rb')].each{ |f| require f }
 Dir[File.join(ROOT, 'lib', '*.rb')].each{ |f| require f }
 
 program :name, 'bookshelf'
@@ -24,7 +25,7 @@ command :pull do |c|
   c.description = "Pull updated files from Bookshelf"
 
   c.action do
-    RemoteBook.update
+    RemoteBook.pull
   end
 end
 
@@ -33,7 +34,8 @@ command :sync do |c|
   c.description = "Pull, then push"
 
   c.action do
-    RemoteBook.update
-    LocalBook.update
+    RemoteBook.pull
+    LocalBook.push
+    RemoteBook.clean
   end
 end

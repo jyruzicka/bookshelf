@@ -1,36 +1,5 @@
 require './spec/spec_helper'
-=begin
-module Bookshelf
-  class RemoteBook
-    attr_accessor :absolute_path
 
-    def self.all
-      glob = File.join(Bookshelf::remote_folder,'**','*')
-      Dir[glob].map{ |p| new(p) }
-    end
-
-    def initialize path
-      @absolute_path = path
-    end
-
-    def relative_path
-      @relative_path ||= absolute_path.sub(/^#{Bookshelf::remote_folder}\/?/,'')
-    end
-
-    def sync!
-      local_book = File.join(Bookshelf::local_folder, relative_path)
-
-      if File.exists?(local_book) && !FileUtils.cmp(absolute_path, local_book)
-        if File.mtime(absolute_path) > File.mtime(local_book)
-          FileUtils::cp absolute_path, local_book
-        else
-          FileUtils::cp local_book, absolute_path
-        end
-      end
-    end
-  end
-end
-=end
 include Bookshelf
 
 describe RemoteBook do
@@ -43,18 +12,18 @@ describe RemoteBook do
     populate_working
   end
 
-  def make_remote filename
+  def make_remote filename, text=''
     full_file = File.join(Bookshelf::remote_folder, filename)
-    touch full_file
+    poopulate full_file, text
   end
 
-  def make_local filename
+  def make_local filename, text=''
     full_file = File.join(Bookshelf::local_folder, filename)
-    touch full_file
+    poopulate full_file, text
   end
 
-  def touch file
-    FileUtils::touch file
+  def poopulate file, text
+    File.open(file,'w'){ |io| io << text }
   end
 
   describe "#all" do
@@ -66,6 +35,24 @@ describe RemoteBook do
   describe "#relative_path" do
     it "should give the correct path" do
       RemoteBook.new(spec_data('remote/remote')).relative_path.should == 'remote'
+    end
+  end
+
+  describe "#sync!" do
+    it "should sync remote books back to local books if remote is newer" do
+      make_local('syncfile', 'local')
+      sleep 2
+      make_remote('syncfile', 'remote') #made after local
+      RemoteBook.new(spec_data 'remote/syncfile').sync!
+      File.read(spec_data 'local/syncfile').should == 'remote'
+    end
+
+    it "should sync local books on to remote books if local is newer" do
+      make_remote('syncfile', 'remote')
+      sleep 2
+      make_local('syncfile', 'local') #made after remote
+      RemoteBook.new(spec_data 'remote/syncfile').sync!
+      File.read(spec_data 'remote/syncfile').should == 'local'
     end
   end
 end

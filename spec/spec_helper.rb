@@ -1,9 +1,13 @@
+VERBOSE = true
+DRYRUN = false
+
 require './lib/bookshelf'
 require 'fileutils'
 
 def set_test_location
   Bookshelf::local_folder = spec_data('local')
   Bookshelf::remote_folder = spec_data('remote')
+  Bookshelf::file_types = nil
   FileUtils::mkdir_p spec_data('local')
   FileUtils::mkdir_p spec_data('remote')
 end

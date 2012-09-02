@@ -1,15 +1,26 @@
 #!/usr/bin/env ruby
 
 require 'notify'
+require 'trollop'
+
+opts = Trollop::options do
+  opt :verbose, 'Output lots of stuff to stdout'
+  opt :dryrun, 'Don\'t copy files'
+end
+
+VERBOSE = opts[:verbose]
+DRYRUN = opts[:dryrun]
 
 ROOT = File.dirname(File.realpath(__FILE__))
 require "#{ROOT}/lib/bookshelf"
 
-LocalBook.flagged.each do |lb|
+Bookshelf::LocalBook.flagged.each do |lb|
+  vputs "#{lb.name} flagged. Copying to remote..."
   lb.unflag!
   lb.copy_to_remote
 end
 
-RemoteBook.all.each do |rb|
+Bookshelf::RemoteBook.all.each do |rb|
+  vputs "Syncing #{rb.name}..."
   rb.sync!
 end

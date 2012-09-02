@@ -3,13 +3,25 @@ module Bookshelf
   class LocalBook
     attr_accessor :absolute_path
 
+    if DRYRUN
+      include FileUtils::DryRun
+    elsif VERBOSE
+      include FileUtils::Verbose
+    else
+      include FileUtils
+    end
+
     def self.flagged
-      glob = File.join(Bookshelf::local_folder, '**', '*')
-      Dir[glob].select{ |f| XAttr.flagged?(f) }.map{ |p| new(p) }
+      glob = File.join(Bookshelf::local_folder, '**', Bookshelf::file_glob)
+      Dir[glob].select{ |f| vputs "Checking #{f}..."; XAttr.flagged?(f) }.map{ |p| new(p) }
     end
 
     def initialize path
       @absolute_path = path
+    end
+
+    def name
+      File.basename(absolute_path)
     end
 
     def relative_path
@@ -22,7 +34,7 @@ module Bookshelf
 
     def copy_to_remote!
       remote_path = File.join(Bookshelf::remote_folder, relative_path)
-      FileUtils::cp absolute_path, remote_path
+      cp absolute_path, remote_path
     end
   end
 end

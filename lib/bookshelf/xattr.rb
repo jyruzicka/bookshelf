@@ -1,10 +1,11 @@
+require 'shellwords'
 module Bookshelf
   module XAttr
     class << self
       REGEXP = Regexp.new(['([0-9A-F]{2})']*32*'\s','m')
 
       def [] file
-        code = `xattr -p com.apple.FinderInfo '#{file}' 2>&1`.split(/\s+/m)
+        code = `xattr -p com.apple.FinderInfo #{file.shellescape} 2>&1`.split(/\s+/m)
         if code.size == 32
           code
         else
@@ -14,7 +15,7 @@ module Bookshelf
 
       def []= file, new_code
         new_code_string = new_code[0,16] * ' ' + "\n" + new_code[16,16] * ' '
-        `xattr -wx com.apple.FinderInfo '#{new_code_string}' '#{file}'`
+        `xattr -wx com.apple.FinderInfo #{new_code_string.shellescape} '#{file}'` unless DRYRUN
       end
 
       def flagged? file
@@ -22,9 +23,14 @@ module Bookshelf
       end
 
       def unflag! file
+        vputs "Unflagging #{file}"
         code = self[file]
         code[9] = '00'
         self[file] = code
+      end
+
+      def escape str
+        str.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
       end
     end
   end

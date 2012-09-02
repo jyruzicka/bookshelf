@@ -2,6 +2,14 @@ module Bookshelf
   class RemoteBook
     attr_accessor :absolute_path
 
+    if DRYRUN
+      include FileUtils::DryRun
+    elsif VERBOSE
+      include FileUtils::Verbose
+    else
+      include FileUtils
+    end
+
     def self.all
       glob = File.join(Bookshelf::remote_folder,'**','*')
       Dir[glob].map{ |p| new(p) }
@@ -9,6 +17,10 @@ module Bookshelf
 
     def initialize path
       @absolute_path = path
+    end
+
+    def name
+      File.basename(absolute_path)
     end
 
     def relative_path
@@ -20,9 +32,9 @@ module Bookshelf
 
       if File.exists?(local_book) && !FileUtils.cmp(absolute_path, local_book)
         if File.mtime(absolute_path) > File.mtime(local_book)
-          FileUtils::cp absolute_path, local_book
+          cp absolute_path, local_book
         else
-          FileUtils::cp local_book, absolute_path
+          cp local_book, absolute_path
         end
       end
     end

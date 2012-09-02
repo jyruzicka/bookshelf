@@ -1,4 +1,4 @@
-VERBOSE = true
+VERBOSE = false
 DRYRUN = false
 
 require './lib/bookshelf'

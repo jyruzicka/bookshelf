@@ -1,41 +1,15 @@
 #!/usr/bin/env ruby
 
 require 'notify'
-require 'commander/import'
 
 ROOT = File.dirname(File.realpath(__FILE__))
-Dir[File.join(ROOT, 'lib', 'prelim','*.rb')].each{ |f| require f }
-Dir[File.join(ROOT, 'lib', '*.rb')].each{ |f| require f }
+require "#{ROOT}/lib/bookshelf"
 
-program :name, 'bookshelf'
-program :version, '0.1.0'
-program :description, 'Synchronise coloured files between a reference Books directory and a Bookshelf directory.'
-
-command :push do |c|
-  c.syntax = "push"
-  c.description = "Push synced files to Bookshelf"
-  
-  c.action do
-    LocalBook.update
-  end
+LocalBook.flagged.each do |lb|
+  lb.unflag!
+  lb.copy_to_remote
 end
 
-command :pull do |c|
-  c.syntax = "pull"
-  c.description = "Pull updated files from Bookshelf"
-
-  c.action do
-    RemoteBook.pull
-  end
-end
-
-command :sync do |c|
-  c.syntax = "sync"
-  c.description = "Pull, then push"
-
-  c.action do
-    RemoteBook.pull
-    LocalBook.push
-    RemoteBook.clean
-  end
+RemoteBook.all.each do |rb|
+  rb.sync!
 end

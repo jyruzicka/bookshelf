@@ -3,18 +3,36 @@ require './spec/spec_helper'
 include Bookshelf
 
 describe XAttr do
-  describe "#initialize" do
-    it "should make an empty xattr by default" do
-      empty_string = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-      XAttr.new.to_s.should == empty_string
-      XAttr.new('foo').to_s.should == empty_string
+  before :all do
+    populate_working
+  end
+
+  let(:coloured_file){ spec_data('local/sample')}
+  let(:uncoloured_file){ spec_data('local/uncoloured')}
+
+  describe "#[]" do
+    it "should collect the right amount of data, regardless" do
+      XAttr[coloured_file].size.should == 32
     end
-    
-    it "should successfully regexp out values" do
-      valid_xattr = '0C 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
-      XAttr.new(valid_xattr)[0].should == '0C'
+
+    it "should actually collect data" do
+      XAttr[coloured_file][9].should == '0C'
+      XAttr[uncoloured_file][9].should == '00'
+    end
+  end
+
+  describe "#flagged?" do
+    it "should detect flagged files" do
+      XAttr.flagged?(coloured_file).should be_true
+      XAttr.flagged?(uncoloured_file).should_not be_true
+    end
+  end
+
+  describe "#unflag!" do
+    it "should unflag files" do
+      XAttr.flagged?(coloured_file).should be_true
+      XAttr.unflag!(coloured_file)
+      XAttr.flagged?(coloured_file).should be_false
     end
   end
 end

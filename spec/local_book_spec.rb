@@ -1,40 +1,67 @@
 require './spec/spec_helper'
+
+=begin
+module Bookshelf
+  # This represents a book stored in the local bookshelf path
+  class LocalBook
+
+    def initialize path
+      @absolute_path = path
+    end
+
+    def relative_path
+      @relative_path = absolute_path.sub(/^#{Bookshelf::local_folder}/,'')
+    end
+    
+    def saturate!
+      xattr = XAttr.from_file(path)
+      xattr.saturate!
+      xattr.save path
+    end
+    
+    def unflag!
+      XAttr.unflag!(absolute_path)
+    end
+
+    def copy_to_remote
+      remote_path = File.join(Bookshelf::remote_folder, relative_path)
+      FileUtils::cp absolute_path, remote_path
+    end
+  end
+end
+=end
 include Bookshelf
 
 describe LocalBook do
-  def local name
-    LocalBook.new(spec_data name)
+  before :all do
+    set_test_location
   end
-  
-  after :each do 
-    duplicate = spec_data('sample_dup')
-    FileUtils::rm duplicate if File.exists?(duplicate)
+
+  before :each do
+    populate_working
   end
-  
-  describe "#coloured" do
-    it "should pick up coloured data files" do
-      Bookshelf::local_folder = spec_data
-      coloured = LocalBook::coloured
-      coloured.size.should == 1
-      coloured[0].name.should == 'sample'
+
+  describe "::flagged" do
+    it "should detect all flagged classes" do
+      LocalBook::flagged.size.should == 1
+      LocalBook::flagged[0].relative_path.should == 'sample'
     end
   end
-  
-  describe "#coloured?" do
-    it "should tell us if a data file is coloured" do
-      local('sample').should be_coloured
-      local('uncoloured').should_not be_coloured
+
+  describe "#relative_path" do
+    it "should only have the relative path in it" do
+      LocalBook.new(spec_data('local/sample')).relative_path.should == 'sample'
     end
   end
-  
-  describe "#desaturate!" do
-    it "should make a coloured file uncoloured" do
-      FileUtils::cp spec_data('sample'), spec_data('sample_dup')
-      duplicate = local('sample_dup')
-      duplicate.saturate!
-      duplicate.should be_coloured
-      duplicate.desaturate!
-      duplicate.should_not be_coloured   
+
+  describe "#copy_to_remote!" do
+    it "should copy the file to the remote directory" do
+      File.should_not exist(spec_data('remote/sample'))
+      lb = LocalBook.new(spec_data('local/sample'))
+      lb.copy_to_remote!
+      File.should exist(spec_data('remote/sample'))
     end
   end
+
+
 end

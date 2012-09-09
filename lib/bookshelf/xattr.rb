@@ -4,6 +4,10 @@ module Bookshelf
     class << self
       REGEXP = Regexp.new(['([0-9A-F]{2})']*32*'\s','m')
 
+      def in directory
+        `mdfind -onlyin #{directory.shellescape} "kMDItemFSLabel == 6"`.split("\n")
+      end
+
       def [] file
         code = `xattr -p com.apple.FinderInfo #{file.shellescape} 2>&1`.split(/\s+/m)
         if code.size == 32
@@ -27,10 +31,6 @@ module Bookshelf
         code = self[file]
         code[9] = '00'
         self[file] = code
-      end
-
-      def escape str
-        str.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
       end
     end
   end

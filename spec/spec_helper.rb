@@ -1,6 +1,6 @@
 VERBOSE = false
 DRYRUN = false
-
+require 'shellwords'
 require './lib/bookshelf'
 require 'fileutils'
 
@@ -18,9 +18,10 @@ end
 
 def clear_working
 	FileUtils::rm_rf spec_data
+  FileUtils::mkdir_p spec_data
 end
 
 def populate_working
   clear_working
-	`cp -a ./spec/data/pristine '#{spec_data}'` # cp -a needed to preserve file colours
+	`cp -a ./spec/data/pristine/* #{spec_data.shellescape}` # cp -a needed to preserve file colours
 end

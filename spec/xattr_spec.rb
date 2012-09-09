@@ -1,9 +1,10 @@
 require './spec/spec_helper'
 
+
 include Bookshelf
 
 describe XAttr do
-  before :all do
+  before :each do
     populate_working
   end
 
@@ -20,6 +21,17 @@ describe XAttr do
       XAttr[uncoloured_file][9].should == '00'
     end
   end
+
+  describe "#in" do
+    it "should collect all coloured files" do
+      # I have no idea why I need to sleep here, but hey
+      sleep 2
+      coloured = XAttr.in spec_data('local')
+      coloured.size.should == 1
+      File.basename(coloured[0]).should == 'sample'
+    end
+  end
+
 
   describe "#flagged?" do
     it "should detect flagged files" do

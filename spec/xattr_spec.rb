@@ -24,8 +24,6 @@ describe XAttr do
 
   describe "#in" do
     it "should collect all coloured files" do
-      # I have no idea why I need to sleep here, but hey
-      sleep 2
       coloured = XAttr.in spec_data('local')
       coloured.size.should == 1
       File.basename(coloured[0]).should == 'sample'

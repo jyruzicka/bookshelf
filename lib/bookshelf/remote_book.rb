@@ -16,7 +16,7 @@ module Bookshelf
     end
 
     def initialize path
-      @absolute_path = path
+      @absolute_path = File.expand_path(path)
     end
 
     def name

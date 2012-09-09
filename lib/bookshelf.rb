@@ -5,9 +5,17 @@ module Bookshelf
   class << self
     # Where we store out stuff locally
     attr_accessor :local_folder
+
+    def local_folder= new_folder
+      @local_folder = File.expand_path(new_folder)
+    end
     
     # Where we're deploying to
     attr_accessor :remote_folder
+
+    def remote_folder= new_folder
+      @remote_folder = File.expand_path(new_folder)
+    end
 
     # Allowed file types
     attr_accessor :file_types

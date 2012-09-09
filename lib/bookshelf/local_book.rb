@@ -12,12 +12,11 @@ module Bookshelf
     end
 
     def self.flagged
-      glob = File.join(Bookshelf::local_folder, '**', Bookshelf::file_glob)
-      Dir[glob].select{ |f| vputs "Checking #{f}..."; XAttr.flagged?(f) }.map{ |p| new(p) }
+      @flagged ||= XAttr.in(Bookshelf::local_folder).map{ |s| new(s) }
     end
 
     def initialize path
-      @absolute_path = path
+      @absolute_path = File.expand_path(path)
     end
 
     def name

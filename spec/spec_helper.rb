@@ -24,4 +24,5 @@ end
 def populate_working
   clear_working
 	`cp -a ./spec/data/pristine/* #{spec_data.shellescape}` # cp -a needed to preserve file colours
+  Dir["#{spec_data}/**/*"].each{ |f| `mdimport #{f.shellescape}` }
 end

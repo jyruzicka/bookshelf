@@ -39,5 +39,9 @@ def vputs str
   puts(str) if VERBOSE
 end
 
+def vprint str
+  print(str) if VERBOSE
+end
+
 lib_root = File.join(File.dirname(File.realpath(__FILE__)), 'bookshelf')
 Dir["#{lib_root}/*.rb"].each{ |f| require f }

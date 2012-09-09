@@ -33,6 +33,7 @@ module Bookshelf
 
     def copy_to_remote!
       remote_path = File.join(Bookshelf::remote_folder, relative_path)
+      mkdir_p File.dirname(remote_path)
       cp absolute_path, remote_path
     end
   end

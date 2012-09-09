@@ -12,7 +12,7 @@ module Bookshelf
 
     def self.all
       glob = File.join(Bookshelf::remote_folder,'**','*')
-      Dir[glob].map{ |p| new(p) }
+      Dir[glob].select{ |f| !File.directory?(f)}.map{ |f| new(f) }
     end
 
     def initialize path
@@ -33,9 +33,13 @@ module Bookshelf
       if File.exists?(local_book) && !FileUtils.cmp(absolute_path, local_book)
         if File.mtime(absolute_path) > File.mtime(local_book)
           cp absolute_path, local_book
+          return :pull
         else
           cp local_book, absolute_path
+          return :push
         end
+      else
+        return nil
       end
     end
   end
